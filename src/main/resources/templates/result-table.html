@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Итоговая таблица — 4 класс</title>
+    <style>
+        body {
+          margin: 0;
+          font-family: Arial, sans-serif;
+        }
+
+        .header {
+          background-color: #2c3e50;
+          color: white;
+          height: 60px;
+          padding: 0 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 24px; /* ← добавлено: увеличивает текст в хедере */
+        }
+
+        .header-title-left,
+        .header-title-center,
+        .header-title-right {
+          flex: 1;
+          text-align: center;
+        }
+
+        .header-title-left {
+          text-align: left;
+          font-weight: bold;
+        }
+
+        .header-title-right {
+          text-align: right;
+        }
+
+        /* Увеличенный стиль кнопки */
+        .header button {
+          background-color: #3498db;
+          color: white;
+          border: none;
+          padding: 10px 20px; /* ← увеличенные отступы */
+          border-radius: 6px;
+          font-size: 18px; /* ← увеличенный шрифт */
+          cursor: pointer;
+        }
+
+        .table-container {
+          padding: 20px;
+        }
+
+        h2 {
+          margin-top: 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+
+        th, td {
+          border: 1px solid #ccc;
+          padding: 8px;
+          text-align: center;
+        }
+
+        th {
+          background-color: #f0f0f0;
+        }
+
+        td:first-child {
+          width: 30px;
+        }
+
+        td:nth-child(2) {
+          text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div class="header-title-left">Joint Review</div>
+    <div class="header-title-center">Физтех 2025</div>
+    <div class="header-title-right">
+        <button onclick="window.location.href='/project'">Project Page</button>
+    </div>
+</div>
+
+<!-- Table Section -->
+<div class="table-container">
+    <h2>Итоговая таблица: 4 класс</h2>
+    <div class="header-title-left">
+        <button onclick="window.location.href='/start-page'">Скачать таблицу в формате .xlsx</button>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>N</th>
+            <th>ФИО</th>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
+            <th>4</th>
+            <th>5</th>
+            <th>6</th>
+            <th>7</th>
+            <th>Сумма</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>Орлов Денис</td>
+            <td>7</td><td>7</td><td>6</td><td>3</td><td>0</td><td>0</td><td>0</td><td>23</td>
+        </tr>
+        <tr><td>2</td><td>Воронин Андрей</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>3</td><td>Филинов Илья</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

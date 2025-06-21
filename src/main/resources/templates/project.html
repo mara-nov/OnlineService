@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <meta charset="UTF-8">
+    <title th:text="${project.name}">Проект</title>
+    <style>
+        body {
+          margin: 0;
+          font-family: Arial, sans-serif;
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .header {
+          background-color: #2c3e50;
+          color: white;
+          height: 60px;
+          padding: 0 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 24px; /* ← добавлено: увеличивает текст в хедере */
+        }
+
+        .header-title-left,
+        .header-title-center,
+        .header-title-right {
+          flex: 1;
+          text-align: center;
+        }
+
+        .header-title-left {
+          text-align: left;
+          font-weight: bold;
+        }
+
+        .header-title-right {
+          text-align: right;
+        }
+
+        /* Увеличенный стиль кнопки */
+        .header button {
+          background-color: #3498db;
+          color: white;
+          border: none;
+          padding: 10px 20px; /* ← увеличенные отступы */
+          border-radius: 6px;
+          font-size: 18px; /* ← увеличенный шрифт */
+          cursor: pointer;
+        }
+        .main-container {
+          flex: 1;
+          display: flex;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .sidebar-left,
+        .sidebar-right {
+          width: 280px;
+          padding: 20px;
+          box-sizing: border-box;
+          overflow-y: auto;
+        }
+
+        .sidebar-left {
+          background-color: #ecf0f1;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .sidebar-right {
+          background-color: #f7f7f7;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .sidebar-left button,
+        .sidebar-right button {
+          border: none;
+          padding: 8px 12px;
+          margin-top: 10px;
+          border-radius: 4px;
+          cursor: pointer;
+          width: 100%;
+          text-align: left;
+        }
+
+        .class-group > button {
+        background-color: #3498db;
+        color: white;
+         border: none;
+        padding: 8px 12px;
+        margin-top: 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        }
+
+        /* Темно-синяя кнопка */
+        .dark-blue-button {
+          background-color: #001f5b;
+          color: white;
+        }
+
+        /* Светло-голубая кнопка */
+        .light-blue-button {
+          background-color: #d0ebff;
+          color: black;
+        }
+
+        .work-list {
+          margin-top: 5px;
+          margin-bottom: 10px;
+        }
+
+        .work-list a {
+          display: block;
+          padding: 6px 10px;
+          margin: 3px 0;
+          background-color: #bdc3c7;
+          color: black;
+          text-decoration: none;
+          border-radius: 4px;
+        }
+
+        .work-list a.active {
+          background-color: #555555;
+          color: white;
+          font-weight: bold;
+        }
+
+        .center-content {
+          flex: 1;
+          padding: 20px;
+          box-sizing: border-box;
+          background-color: #ffffff;
+          overflow-y: auto;
+        }
+
+        .center-content iframe {
+          width: 100%;
+          height: 80vh;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+        }
+
+        .placeholder {
+          color: #888;
+          font-size: 18px;
+          text-align: center;
+          margin-top: 100px;
+        }
+
+        .bottom-buttons {
+          margin-top: auto;
+        }
+
+        .class-group {
+          margin-bottom: 10px;
+        }
+
+        /* Кнопки управления таблицей проверки */
+        .check-buttons {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 10px;
+          gap: 10px;
+        }
+
+        .check-buttons button {
+          background-color: #ccc;
+          font-size: 12px;
+          padding: 6px 10px;
+          border-radius: 4px;
+          border: none;
+          cursor: pointer;
+        }
+
+        .form-button {
+          background-color: #A9A9A9;
+          color: black;
+          border: none;
+          padding: 8px 20px;
+          border-radius: 6px;
+          font-size: 16px;
+          cursor: pointer;
+          width: 60%; /* шире, но не на всю */
+          align-self: flex-start; /* выравнивание по левому краю */
+          margin-bottom: 10px; /* немного отступа между кнопками */
+        }
+
+        .form-button-light {
+         background-color: #3498db;
+          color: white;
+          border: none;
+          padding: 10px 20px; /* ← увеличенные отступы */
+          border-radius: 6px;
+          font-size: 18px; /* ← увеличенный шрифт */
+          cursor: pointer;
+        }
+        #conditionsModal {
+    /* чтобы модалка выглядела аккуратно */
+    box-sizing: border-box;
+    overflow: hidden; /* чтоб контент не выходил за края */
+    border-radius: 6px;
+    position: fixed;
+    background: white;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    user-select: none; /* чтобы не выделялось случайно при перетаскивании */
+}
+
+#conditionsModal iframe {
+    pointer-events: auto; /* чтобы iframe нормально работал */
+    user-select: text; /* чтобы можно было выделять текст в iframe */
+}
+
+#resizeHandle {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    cursor: se-resize;
+    background:
+      linear-gradient(45deg, transparent 50%, #888 50%),
+      linear-gradient(135deg, transparent 50%, #888 50%);
+    background-repeat: no-repeat;
+    background-position: bottom right, top left;
+    background-size: 10px 10px;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+#resizeHandle:hover {
+    opacity: 1;
+}
+
+        .light-blue-button {
+        background-color: #87CEEB; /* светло-голубой */
+        color: #000;
+        border: none;
+        padding: 10px 14px;
+        margin-bottom: 6px;
+        font-size: 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+    }
+
+    .light-blue-button:hover {
+        background-color: #87CEEB;
+    }
+    </style>
+</head>
+<body th:attr="data-project-id=${project.identifier}, data-work-id=${selectedWork != null ? selectedWork.id : ''}">
+
+<!-- Header -->
+<div class="header">
+    <div class="header-title-left">Joint Review</div>
+    <div class="header-title-center" th:text="${project.name}">Project Name</div>
+    <div class="header-title-right">
+        <button onclick="window.location.href='/start-page'">Start Page</button>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main-container">
+
+    <!-- Sidebar Left -->
+    <div class="sidebar-left">
+        <div th:each="group : ${groupWorks}" class="class-group">
+            <button th:onclick="'toggleClass(\'group-' + ${group.id} + '\')'"
+                    th:text="${group.name} + ' ▼'"></button>
+            <div th:id="'group-' + ${group.id}" style="display: none;" class="work-list">
+                <a th:each="work : ${group.works}"
+                   th:href="@{/project(identifier=${project.identifier}, workId=${work.id})}"
+                   th:text="${work.name}"
+                   th:classappend="${selectedWork?.id} == ${work.id} ? 'active' : ''"
+                   onclick="showBottomButtons()"></a>
+                <button class="dark-blue-button"
+                        th:onclick="'addWork(' + ${group.id} + ')'"
+                >Добавить работу</button>
+            </div>
+        </div>
+
+        <div style="margin-top: auto;">
+            <button class="dark-blue-button" onclick="showAddGroupForm()">Добавить новую группу работ</button>
+
+        </div>
+    </div>
+
+    <!-- Center Content -->
+    <div class="center-content">
+        <div th:if="${selectedWork != null}">
+            <h2 th:text="${selectedWork.name}">Название работы</h2>
+            <iframe th:src="@{'/pdf/' + ${selectedWork.pdfPath}}" type="application/pdf">
+                Ваш браузер не поддерживает встроенное отображение PDF.
+            </iframe>
+        </div>
+        <div th:if="${selectedWork == null}" class="placeholder">
+            <p>Выберите работу</p>
+        </div>
+        <!-- Центр: форма добавления новой группы работ -->
+        <div id="addGroupForm" style="display: none;">
+            <h2>Новая группа работ</h2>
+            <label for="groupName" style="display: block; margin-bottom: 6px; font-weight: bold;">
+                Введите название:
+            </label>
+            <input type="text" id="groupName" placeholder="Например: 9 класс"
+                   style="width: 490px; padding: 8px; margin: 10px 0 20px 0; font-size: 16px;
+           border-radius: 4px; border: 1px solid #ccc;" />
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="form-button" onclick="upload('tasks')">Добавить условия</button>
+                <button class="form-button" onclick="upload('criteria')">Добавить критерии</button>
+                <button class="form-button" onclick="upload('work')">Добавить работу</button>
+                <button class="form-button form-button-light" onclick="saveGroup()">Сохранить</button>
+            </div>
+            <div id="uploadedFilesList" style="margin-top: 15px;"></div>
+        </div>
+
+
+    </div>
+
+    <!-- Sidebar Right -->
+    <div class="sidebar-right">
+
+        <div th:each="group : ${groupWorks}" style="margin-bottom: 10px;">
+            <button class="light-blue-button"
+                    th:text="'Итоговая таблица: ' + ${group.name}"
+                    th:onclick="location.href='/project/results/table'">
+            </button>
+        </div>
+
+
+        <div id="bottomButtons" class="bottom-buttons" th:if="${selectedWork != null}">
+            <button class="dark-blue-button" onclick="openConditions()">Условия</button>
+            <button class="dark-blue-button" onclick="openCriteria()">Критерии</button>
+            <button class="dark-blue-button" onclick="openCheckTable()">Таблица проверки</button>
+        </div>
+
+        <div id="conditionsModal" style="display:none; position:fixed; left:50px; top:50px; width:80%; height:80%; background:white; border:1px solid #ccc; box-shadow:0 0 10px gray; z-index:1000; overflow:auto;">
+            <div style="position:relative; height:100%;">
+                <span style="position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer;" onclick="closeConditions()">&times;</span>
+                <iframe id="conditionsFrame" src="" width="100%" height="100%" style="border:none;"></iframe>
+
+                <!-- Ручка для изменения размера -->
+                <div id="resizeHandle">
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div id="checkTableModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 9999;">
+    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <h3>Таблица проверки</h3>
+        <table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
+            <thead>
+            <tr>
+                <th>ФИО проверяющего</th>
+                <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+            </tr>
+            </thead>
+            <tbody id="checkTableBody">
+            <tr>
+                <td contenteditable="true" style="min-width: 120px;"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="check-buttons">
+            <button onclick="addCheckTableRow()">Добавить строку</button>
+            <button onclick="saveCheckTable()">Сохранить</button>
+            <button onclick="closeCheckTable()">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleClass(id) {
+        const section = document.getElementById(id);
+        section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function openCheckTable() {
+        document.getElementById('checkTableModal').style.display = 'flex';
+    }
+
+    function closeCheckTable() {
+        document.getElementById('checkTableModal').style.display = 'none';
+    }
+
+    function addCheckTableRow() {
+        const tbody = document.getElementById('checkTableBody');
+        const newRow = document.createElement('tr');
+        for (let i = 0; i < 8; i++) {
+            const td = document.createElement('td');
+            td.contentEditable = "true";
+            if(i === 0) td.style.minWidth = "120px";
+            newRow.appendChild(td);
+        }
+        tbody.appendChild(newRow);
+    }
+
+    function saveCheckTable() {
+        closeCheckTable();
+    }
+
+    function showBottomButtons() {
+        const btns = document.getElementById('bottomButtons');
+        if (btns) btns.classList.add('visible');
+    }
+
+    function addWork(groupId) {
+        alert('Добавить работу в группу ID: ' + groupId);
+    }
+
+    function selectResultTable(id) {
+        alert('Вы выбрали итоговую таблицу с ID: ' + id);
+    }
+</script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    /* Сначала задаём переменную как строку (с кавычками) */
+    var rawPath = /*[[${conditionsPath}]]*/ 'null';
+    /* Убираем кавычки */
+    window.conditionsPath = rawPath ? rawPath.replace(/^"(.*)"$/, '$1') : null;
+    /*]]>*/
+</script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    /* Сначала задаём переменную как строку (с кавычками) */
+    var rawPath = /*[[${criteriaPath}]]*/ 'null';
+    /* Убираем кавычки */
+    window.criteriaPath = rawPath ? rawPath.replace(/^"(.*)"$/, '$1') : null;
+    /*]]>*/
+</script>
+
+
+<input type="file" id="fileInput" style="display:none;" />
+
+<script src="/js/project-page.js"></script>
+
+</body>
+</html>
