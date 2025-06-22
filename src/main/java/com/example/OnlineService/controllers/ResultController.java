@@ -1,10 +1,7 @@
 package com.example.OnlineService.controllers;
 
 
-import com.example.OnlineService.models.CheckResult;
-import com.example.OnlineService.models.GroupWork;
-import com.example.OnlineService.models.ResultTable;
-import com.example.OnlineService.models.Work;
+import com.example.OnlineService.models.*;
 import com.example.OnlineService.modelsDTO.FinalResultDTO;
 import com.example.OnlineService.repositories.GroupWorkRepository;
 import com.example.OnlineService.repositories.ProjectRepository;
@@ -15,14 +12,18 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class ResultController {
@@ -48,10 +49,14 @@ public class ResultController {
     }
 
     @GetMapping("/result-table")
-    public String showResultTable(@RequestParam("resultTableId") Long resultTableId, Model model) {
+    public String showResultTable(@RequestParam("resultTableId") Long resultTableId,
+                                  @RequestParam("projectId") Long projectIdentifier, Model model) {
         ResultTable resultTable = resultTableRepository.findById(resultTableId).orElseThrow();
         GroupWork groupWork = groupWorkRepository.findById(resultTable.getGroupWorkId()).orElseThrow();
         List<Work> works = workRepository.findByGroupId(groupWork.getId());
+        Project project = Optional.ofNullable(projectRepository.findByIdentifier(projectIdentifier))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
 
         List<FinalResultDTO> results = new ArrayList<>();
         for (Work work : works) {
@@ -59,9 +64,12 @@ public class ResultController {
             if (!checkResults.isEmpty()) {
                 CheckResult last = checkResults.get(checkResults.size() - 1);
                 results.add(new FinalResultDTO(work.getName(), last.getScores()));
+            } else {
+                results.add(new FinalResultDTO(work.getName(), Collections.emptyList()));
             }
         }
 
+        model.addAttribute("project", project);
         model.addAttribute("groupWork", groupWork);
         model.addAttribute("results", results);
         model.addAttribute("resultTableId", resultTableId);
@@ -69,14 +77,28 @@ public class ResultController {
         return "result-table";
     }
 
+    private String sanitizeFilename(String input) {
+        return input.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("\\s+", "_");
+    }
+
+
     @GetMapping("/result-table/download")
-    public void downloadExcel(@RequestParam("resultTableId") Long resultTableId, HttpServletResponse response) throws IOException {
+    public void downloadExcel(@RequestParam("resultTableId") Long resultTableId,
+                              @RequestParam("projectId") Long projectIdentifier, HttpServletResponse response) throws IOException {
         ResultTable resultTable = resultTableRepository.findById(resultTableId).orElseThrow();
         GroupWork groupWork = groupWorkRepository.findById(resultTable.getGroupWorkId()).orElseThrow();
         List<Work> works = workRepository.findByGroupId(groupWork.getId());
 
+        Project project = Optional.ofNullable(projectRepository.findByIdentifier(projectIdentifier))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
+        String filename = String.format("result-table(%s_%s).xlsx",
+                sanitizeFilename(project.getName()),
+                sanitizeFilename(groupWork.getName())
+        );
+
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=final-table.xlsx");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("Итоговая таблица");

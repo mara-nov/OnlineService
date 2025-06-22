@@ -335,9 +335,10 @@
         <div th:each="group : ${groupWorks}" style="margin-bottom: 10px;">
             <button class="light-blue-button"
                     th:text="'Итоговая таблица: ' + ${group.name}"
-                    th:onclick="location.href='/project/results/table'">
+                    th:onclick="'location.href=\'/result-table?resultTableId=' + ${group.resultTable.id} + '&projectId=' + ${project.identifier} + '\''">
             </button>
         </div>
+
 
 
         <div id="bottomButtons" class="bottom-buttons" th:if="${selectedWork != null}">

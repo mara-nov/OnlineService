@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>Итоговая таблица — 4 класс</title>
+    <title th:text="${groupWork.name}">Итоговая таблица</title>
     <style>
         body {
           margin: 0;
@@ -85,43 +85,43 @@
 <!-- Header -->
 <div class="header">
     <div class="header-title-left">Joint Review</div>
-    <div class="header-title-center">Физтех 2025</div>
+    <div class="header-title-center" th:text="${project.name}">Project Name</div>
     <div class="header-title-right">
-        <button onclick="window.location.href='/project'">Project Page</button>
+        <button th:onclick="'window.location.href=\'/project?identifier=' + ${project.identifier} + '\''">
+            Project Page
+        </button>
     </div>
 </div>
 
 <!-- Table Section -->
 <div class="table-container">
-    <h2>Итоговая таблица: 4 класс</h2>
+    <h2>Итоговая таблица: <span th:text="${groupWork.name}"></span></h2>
     <div class="header-title-left">
-        <button onclick="window.location.href='/start-page'">Скачать таблицу в формате .xlsx</button>
+        <form th:action="@{/result-table/download}" method="get" target="_blank">
+            <input type="hidden" name="resultTableId" th:value="${resultTableId}" />
+            <input type="hidden" name="projectId" th:value="${project.identifier}" />
+            <button type="submit">Скачать таблицу в формате .xlsx</button>
+        </form>
     </div>
+
+
     <table>
         <thead>
         <tr>
-            <th>N</th>
             <th>ФИО</th>
-            <th>1</th>
-            <th>2</th>
-            <th>3</th>
-            <th>4</th>
-            <th>5</th>
-            <th>6</th>
-            <th>7</th>
-            <th>Сумма</th>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th> <th>Сумма</th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td>1</td>
-            <td>Орлов Денис</td>
-            <td>7</td><td>7</td><td>6</td><td>3</td><td>0</td><td>0</td><td>0</td><td>23</td>
+        <tr th:each="result : ${results}">
+            <td th:text="${result.workName}"></td>
+            <th:block th:each="i : ${#numbers.sequence(0,6)}">
+                <td th:text="${i < result.scores.size()} ? ${result.scores[i]} : ''"></td>
+            </th:block>
+            <td th:text="${result.total}"></td>
         </tr>
-        <tr><td>2</td><td>Воронин Андрей</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-        <tr><td>3</td><td>Филинов Илья</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-
         </tbody>
+
     </table>
 </div>
 
